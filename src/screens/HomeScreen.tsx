@@ -63,7 +63,7 @@ export default function HomeScreen() {
       {/* Header Section */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>Hello, Karn 👋</Text>
+          <Text style={styles.greeting}>Welcome to Job Quest 👋</Text>
           <Text style={styles.subtitle}>Find your perfect remote job</Text>
         </View>
         {/* Placeholder for Profile Picture */}
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   greeting: {
-    fontSize: 16,
+    fontSize: 20,
     color: COLORS.textSub,
     marginBottom: 4,
   },
