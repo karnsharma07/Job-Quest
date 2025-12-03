@@ -30,6 +30,15 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
         }}
       />
-    </Tabs>
+    <Tabs.Screen
+  name="saved-jobs"
+  options={{
+    title: "Saved",
+    tabBarIcon: ({ color }) => (
+      <IconSymbol name="bookmark.fill" size={28} color={color} />
+    ),
+  }}
+/>
+
   );
 }
