@@ -48,5 +48,15 @@ export default function TabLayout() {
     ),
   }}
 />
-  );
+<Tabs.Screen
+  name="application-tracker"
+  options={{
+    title: "Tracker",
+    tabBarIcon: ({ color }) => (
+      <IconSymbol size={28} name="checkmark.circle.fill" color={color} />
+    ),
+  }}
+/>
+
+ );
 }
