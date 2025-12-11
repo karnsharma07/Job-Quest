@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 
 import { COLORS, SIZES, SHADOWS } from '../constants/theme';
+import { router } from 'expo-router';
 
 interface JobItem {
   id: string;
@@ -53,12 +54,14 @@ export default function HomeScreen() {
 
   const toggleSave = (id: string) => {
     if (savedJobs.includes(id)) {
-      setSavedJobs(savedJobs.filter(jobId => jobId !== id)); // Remove
+      setSavedJobs(savedJobs.filter(jobId => jobId !== id));
     } else {
-      setSavedJobs([...savedJobs, id]); // Add
-      Alert.alert("Job Saved", "This job has been added to your saved list.");
+      setSavedJobs([...savedJobs, id]);
+      Alert.alert("Job Saved", "added to your saved list.");
+      router.push('/(tabs)/saved-jobs');
     }
   };
+
 
   const performFilter = (searchText: string, jobType: string, salaryRange: string) => {
     let result = DATA;
