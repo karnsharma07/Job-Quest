@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface FavoritesState {
-  ids: string[]; // We only save the ID of the job to keep it lightweight
+  ids: string[];
 }
 
 const initialState: FavoritesState = {
@@ -13,7 +13,7 @@ const favoritesSlice = createSlice({
   initialState,
   reducers: {
     addFavorite: (state, action: PayloadAction<string>) => {
-      // Only add if not already there
+
       if (!state.ids.includes(action.payload)) {
         state.ids.push(action.payload);
       }

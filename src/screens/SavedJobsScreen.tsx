@@ -1,39 +1,55 @@
 import React from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
+import { useSelector, useDispatch } from "react-redux"; 
+import { removeFavorite } from "../redux/favoritesSlice";
+import { RootState } from "../redux/store";
+import { JOB_DATA } from "../constants/jobs"; 
 import { COLORS, SIZES, SHADOWS } from "../constants/theme";
 
-// Dummy saves
-const savedJobs = [
-  { id: "1", title: "React Developer", company: "TechNova" },
-  { id: "2", title: "UI Designer", company: "CreativeFlow" },
-];
-
 export default function SavedJobsScreen() {
-  const renderItem = ({ item }) => (
+  const dispatch = useDispatch();
+  
+  // Get saved IDs from Redux
+  const savedIds = useSelector((state: RootState) => state.favorites.ids);
+  
+  const savedJobs = JOB_DATA.filter((job) => savedIds.includes(job.id));
+
+  const renderItem = ({ item }: any) => (
     <TouchableOpacity style={styles.card}>
       <View style={styles.row}>
         <View style={styles.iconBox}>
           <Text style={styles.iconText}>{item.company.charAt(0)}</Text>
         </View>
 
-        <View>
+        <View style={{flex: 1}}>
           <Text style={styles.title}>{item.title}</Text>
           <Text style={styles.company}>{item.company}</Text>
         </View>
+
+        <TouchableOpacity 
+          onPress={() => dispatch(removeFavorite(item.id))}
+          style={styles.removeBtn}
+        >
+          <Text style={styles.removeBtnText}>Remove</Text>
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Saved Jobs</Text>
-
-      <FlatList
-        data={savedJobs}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: 20 }}
-      />
+      <Text style={styles.header}>Saved Jobs ({savedJobs.length})</Text>
+      
+      {savedJobs.length === 0 ? (
+         <Text style={{color: COLORS.textSub, marginTop: 20}}>No saved jobs yet.</Text>
+      ) : (
+        <FlatList
+            data={savedJobs}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={{ paddingBottom: 20 }}
+        />
+      )}
     </View>
   );
 }
@@ -43,6 +59,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: SIZES.padding,
     backgroundColor: COLORS.background,
+    paddingTop: 50, 
   },
   header: {
     fontSize: 22,
@@ -57,7 +74,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.secondary,
     marginBottom: 15,
-    ...SHADOWS.small,
+    ...SHADOWS.medium,
   },
   row: {
     flexDirection: "row",
@@ -86,4 +103,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.textSub,
   },
+  removeBtn: {
+    backgroundColor: '#fee2e2',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 6,
+  },
+  removeBtnText: {
+    color: COLORS.error,
+    fontSize: 12,
+    fontWeight: "bold",
+  }
 });

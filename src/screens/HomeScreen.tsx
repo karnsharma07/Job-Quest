@@ -6,17 +6,19 @@ import {
   FlatList, 
   TouchableOpacity, 
   StyleSheet, 
-  SafeAreaView, 
-  StatusBar,
-  ListRenderItem,
-  Modal,
   TouchableWithoutFeedback,
   Keyboard,
-  Alert
+  Alert,
+  Modal,
+  StatusBar,
+  ListRenderItem,
+  Platform
 } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { addFavorite, removeFavorite } from '../redux/favoritesSlice';
+import { RootState } from '../redux/store';
 
 import { COLORS, SIZES, SHADOWS } from '../constants/theme';
-import { router } from 'expo-router';
 
 interface JobItem {
   id: string;
@@ -26,7 +28,7 @@ interface JobItem {
   type: string;
 }
 
-// dummy data for jobs
+// Local Data
 const DATA: JobItem[] = [
   { id: '1', title: 'Senior React Developer', company: 'TechNova', salary: '$120k/yr', type: 'Remote' },
   { id: '2', title: 'UI/UX Designer', company: 'CreativeFlow', salary: '$95k/yr', type: 'Remote' },
@@ -41,27 +43,24 @@ const DATA: JobItem[] = [
 ];
 
 export default function HomeScreen() {
+  const dispatch = useDispatch();
+  const savedJobs = useSelector((state: RootState) => state.favorites.ids);
+
   const [search, setSearch] = useState<string>('');
   const [filteredData, setFilteredData] = useState<JobItem[]>(DATA);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
-  // Filter States
   const [selectedJobType, setSelectedJobType] = useState<string>('Remote');
   const [selectedSalary, setSelectedSalary] = useState<string>('$80k-120k');
 
-  // State to track saved jobs (Array of IDs)
-  const [savedJobs, setSavedJobs] = useState<string[]>([]);
-
   const toggleSave = (id: string) => {
     if (savedJobs.includes(id)) {
-      setSavedJobs(savedJobs.filter(jobId => jobId !== id));
+      dispatch(removeFavorite(id));
     } else {
-      setSavedJobs([...savedJobs, id]);
-      Alert.alert("Job Saved", "added to your saved list.");
-      router.push('/(tabs)/saved-jobs');
+      dispatch(addFavorite(id));
+      Alert.alert("Job Saved! ❤️", "This job has been added to your Saved tab.");
     }
   };
-
 
   const performFilter = (searchText: string, jobType: string, salaryRange: string) => {
     let result = DATA;
@@ -81,23 +80,20 @@ export default function HomeScreen() {
         result = result.filter(item => item.type === jobType);
     }
 
-    // 3. Filter by Salary (Expanded logic for new data)
+    // 3. Filter by Salary
     if (salaryRange === '$50k-80k') {
-        // Checks for 50k, 60k, 70k, 55k, 65k
         result = result.filter(item => 
           item.salary.includes('$50k') || item.salary.includes('$55k') || 
           item.salary.includes('$60k') || item.salary.includes('$65k') || 
           item.salary.includes('$70k') || item.salary.includes('$80k')
         );
     } else if (salaryRange === '$80k-120k') {
-         // Checks for higher salaries
          result = result.filter(item => 
            item.salary.includes('$95k') || item.salary.includes('$105k') || 
            item.salary.includes('$110k') || item.salary.includes('$120k') || 
            item.salary.includes('$130k')
          );
     }
-
     setFilteredData(result);
   };
 
@@ -111,7 +107,6 @@ export default function HomeScreen() {
     setModalVisible(false);
   };
 
-  // Reusable Filter Button Component
   const FilterOption = ({ label, selectedState, setSelectedState }: any) => {
     const isSelected = selectedState === label;
     return (
@@ -145,8 +140,11 @@ export default function HomeScreen() {
           </View>
 
           {/* Save Button (Heart) */}
-          <TouchableOpacity onPress={() => toggleSave(item.id)}>
-            <Text style={{fontSize: 22}}>
+          <TouchableOpacity 
+            onPress={() => toggleSave(item.id)}
+            hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
+          >
+            <Text style={{fontSize: 24}}>
               {isSaved ? '❤️' : '🤍'} 
             </Text>
           </TouchableOpacity>
@@ -164,18 +162,18 @@ export default function HomeScreen() {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
         
-        <View style={styles.header}>
+        <View style={styles.topNavBar}>
           <View>
-            <Text style={styles.greeting}>Hello, Karn 👋</Text>
-            <Text style={styles.subtitle}>Find your perfect remote job</Text>
+            <Text style={styles.navGreeting}>Hello, Karn 👋</Text>
+            <Text style={styles.navTitle}>Job Quest</Text>
           </View>
           <View style={styles.profilePic} /> 
         </View>
 
-        <View style={styles.searchContainer}>
+        <View style={styles.searchSection}>
           <View style={styles.searchBar}>
             <TextInput
               style={styles.input}
@@ -209,7 +207,6 @@ export default function HomeScreen() {
           />
         </View>
 
-        {/* Filter Modal */}
         <Modal
           animationType="slide"
           transparent={true}
@@ -251,7 +248,7 @@ export default function HomeScreen() {
           </View>
         </Modal>
 
-      </SafeAreaView>
+      </View>
     </TouchableWithoutFeedback>
   );
 }
@@ -261,36 +258,46 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  header: {
-    padding: SIZES.padding,
+  // NAV BAR STYLES 
+  topNavBar: {
+    backgroundColor: COLORS.primary,
+    paddingTop: Platform.OS === 'android' ? 40 : 60, 
+    paddingHorizontal: SIZES.padding,
+    paddingBottom: 30, 
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 10,
+    ...SHADOWS.medium,
+    zIndex: 1,
   },
-  greeting: {
-    fontSize: 16,
-    color: COLORS.textSub,
+  navGreeting: {
+    fontSize: 14,
+    color: COLORS.secondary, 
     marginBottom: 4,
   },
-  subtitle: {
-    fontSize: SIZES.header,
+  navTitle: {
+    fontSize: 24,
     fontWeight: 'bold',
-    color: COLORS.textMain,
+    color: COLORS.white,
   },
   profilePic: {
     width: 45,
     height: 45,
     borderRadius: 25,
-    backgroundColor: COLORS.secondary,
-    borderWidth: 1,
-    borderColor: COLORS.primary,
+    backgroundColor: COLORS.white,
+    borderWidth: 2,
+    borderColor: COLORS.secondary,
   },
-  searchContainer: {
+  
+  // SEARCH
+  searchSection: {
+    marginTop: -25, 
     flexDirection: 'row',
     paddingHorizontal: SIZES.padding,
-    marginBottom: 20,
     gap: 10,
+    zIndex: 2,
   },
   searchBar: {
     flex: 1,
@@ -301,6 +308,7 @@ const styles = StyleSheet.create({
     height: 50,
     borderWidth: 1,
     borderColor: COLORS.border,
+    ...SHADOWS.medium,
   },
   input: {
     fontSize: 14,
@@ -309,7 +317,7 @@ const styles = StyleSheet.create({
   filterBtn: {
     width: 50,
     height: 50,
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.darkGreen,
     borderRadius: SIZES.borderRadius,
     justifyContent: 'center',
     alignItems: 'center',
@@ -320,9 +328,12 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold',
   },
+
+  // CARDS
   feedContainer: {
     flex: 1,
     paddingHorizontal: SIZES.padding,
+    marginTop: 20,
   },
   sectionTitle: {
     fontSize: 18,
@@ -389,7 +400,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: COLORS.primary,
   },
-  // MODAL STYLES
+  // MODAL
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',

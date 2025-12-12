@@ -1,6 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
 import { Platform, StyleSheet, Text, View } from 'react-native';
-// Import your Emerald theme
 import { COLORS, SIZES } from '../src/constants/theme';
 
 export default function ModalScreen() {
@@ -15,7 +14,6 @@ export default function ModalScreen() {
         You can use this space for settings, detailed info, or other pop-up content.
       </Text>
 
-      {/* Use the status bar style that works best for your OS */}
       <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
     </View>
   );
@@ -26,19 +24,19 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: COLORS.background, // Use your theme background
+    backgroundColor: COLORS.background, 
     padding: SIZES.padding,
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: COLORS.textMain, // Use your theme text color
+    color: COLORS.textMain,
   },
   separator: {
     marginVertical: 30,
     height: 1,
     width: '80%',
-    backgroundColor: COLORS.secondary, // Use your theme accent
+    backgroundColor: COLORS.secondary,
   },
   text: {
     fontSize: 16,
