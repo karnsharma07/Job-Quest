@@ -1,17 +1,43 @@
-import { useColorScheme } from '@/src/hooks/use-color-scheme';
+import React from 'react';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs } from 'expo-router';
+import { COLORS } from '../../src/constants/theme';
 
-export default function TabsLayout() {
-  const theme = useColorScheme();
+function TabBarIcon(props: {
+  name: React.ComponentProps<typeof FontAwesome>['name'];
+  color: string;
+}) {
+  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
+}
 
+export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: theme === 'dark' ? 'white' : 'black',
-      }}
-    >
-      {/* Add your tab screens here */}
+        tabBarActiveTintColor: COLORS.primary, 
+        tabBarInactiveTintColor: COLORS.textSub,
+        tabBarStyle: {
+            backgroundColor: COLORS.white,
+            borderTopColor: COLORS.border,
+        },
+        headerShown: false, 
+      }}>
+      
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Home',
+          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+        }}
+      />
+
+      <Tabs.Screen
+        name="explore" 
+        options={{
+          title: 'Saved',
+          tabBarIcon: ({ color }) => <TabBarIcon name="heart" color={color} />,
+        }}
+      />
     </Tabs>
   );
 }
