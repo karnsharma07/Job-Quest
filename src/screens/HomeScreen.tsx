@@ -17,8 +17,9 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { addFavorite, removeFavorite } from '../redux/favoritesSlice';
 import { RootState } from '../redux/store';
-
 import { COLORS, SIZES, SHADOWS } from '../constants/theme';
+import { JOB_DATA } from '../constants/jobs';
+import ProgressBar from '../components/ProgressBar';
 
 interface JobItem {
   id: string;
@@ -28,28 +29,15 @@ interface JobItem {
   type: string;
 }
 
-// Local Data
-const DATA: JobItem[] = [
-  { id: '1', title: 'Senior React Developer', company: 'TechNova', salary: '$120k/yr', type: 'Remote' },
-  { id: '2', title: 'UI/UX Designer', company: 'CreativeFlow', salary: '$95k/yr', type: 'Remote' },
-  { id: '3', title: 'Product Manager', company: 'BizScale', salary: '$110k/yr', type: 'Hybrid' },
-  { id: '4', title: 'Data Scientist', company: 'DataMinds', salary: '$130k/yr', type: 'Remote' },
-  { id: '5', title: 'Mobile App Dev', company: 'Appify', salary: '$105k/yr', type: 'On-Site' },
-  { id: '6', title: 'Junior Web Developer', company: 'StartUp Inc', salary: '$60k/yr', type: 'Remote' },
-  { id: '7', title: 'Content Writer', company: 'WriteAway', salary: '$55k/yr', type: 'Remote' },
-  { id: '8', title: 'QA Tester', company: 'BugFree', salary: '$70k/yr', type: 'Hybrid' },
-  { id: '9', title: 'Customer Support', company: 'HelpDesk', salary: '$50k/yr', type: 'Remote' },
-  { id: '10', title: 'Marketing Coordinator', company: 'MarketMakers', salary: '$65k/yr', type: 'On-Site' },
-];
-
 export default function HomeScreen() {
   const dispatch = useDispatch();
   const savedJobs = useSelector((state: RootState) => state.favorites.ids);
 
   const [search, setSearch] = useState<string>('');
-  const [filteredData, setFilteredData] = useState<JobItem[]>(DATA);
+  const [filteredData, setFilteredData] = useState<JobItem[]>(JOB_DATA);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
+  // Filter States
   const [selectedJobType, setSelectedJobType] = useState<string>('Remote');
   const [selectedSalary, setSelectedSalary] = useState<string>('$80k-120k');
 
@@ -63,9 +51,8 @@ export default function HomeScreen() {
   };
 
   const performFilter = (searchText: string, jobType: string, salaryRange: string) => {
-    let result = DATA;
+    let result = JOB_DATA;
 
-    // 1. Filter by Text
     if (searchText) {
       result = result.filter((item) => {
         const itemData = item.title ? item.title.toUpperCase() : ''.toUpperCase();
@@ -75,12 +62,10 @@ export default function HomeScreen() {
       });
     }
 
-    // 2. Filter by Job Type
     if (jobType !== 'All') {
         result = result.filter(item => item.type === jobType);
     }
 
-    // 3. Filter by Salary
     if (salaryRange === '$50k-80k') {
         result = result.filter(item => 
           item.salary.includes('$50k') || item.salary.includes('$55k') || 
@@ -139,7 +124,6 @@ export default function HomeScreen() {
             <Text style={styles.companyName}>{item.company}</Text>
           </View>
 
-          {/* Save Button (Heart) */}
           <TouchableOpacity 
             onPress={() => toggleSave(item.id)}
             hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
@@ -166,9 +150,16 @@ export default function HomeScreen() {
         <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
         
         <View style={styles.topNavBar}>
-          <View>
+          <View style={{flex: 1, marginRight: 15}}>
             <Text style={styles.navGreeting}>Hello, Karn 👋</Text>
-            <Text style={styles.navTitle}>Job Quest</Text>
+            
+            <View style={{marginTop: 5}}>
+                <Text style={{color: COLORS.secondary, fontSize: 10, marginBottom: 2}}>Profile Strength</Text>
+                <View style={{height: 6, backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: 3}}>
+                    <View style={{width: '75%', height: '100%', backgroundColor: COLORS.white, borderRadius: 3}} />
+                </View>
+            </View>
+            
           </View>
           <View style={styles.profilePic} /> 
         </View>
@@ -258,7 +249,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  // NAV BAR STYLES 
   topNavBar: {
     backgroundColor: COLORS.primary,
     paddingTop: Platform.OS === 'android' ? 40 : 60, 
@@ -273,14 +263,10 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   navGreeting: {
-    fontSize: 14,
-    color: COLORS.secondary, 
-    marginBottom: 4,
-  },
-  navTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: COLORS.white,
+    color: COLORS.white, 
+    marginBottom: 4,
   },
   profilePic: {
     width: 45,
@@ -290,8 +276,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: COLORS.secondary,
   },
-  
-  // SEARCH
   searchSection: {
     marginTop: -25, 
     flexDirection: 'row',
@@ -328,8 +312,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold',
   },
-
-  // CARDS
   feedContainer: {
     flex: 1,
     paddingHorizontal: SIZES.padding,
@@ -400,7 +382,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: COLORS.primary,
   },
-  // MODAL
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
